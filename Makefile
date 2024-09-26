@@ -13,3 +13,6 @@ build-site:
 
 run-server:
 	$(INTERPRETER) -m http.server --directory output
+
+publish-site:
+	ghp-import -b gh-pages output
