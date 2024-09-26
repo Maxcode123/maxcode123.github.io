@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="{% block html_lang %}{{ DEFAULT_LANG }}{% endblock html_lang %}">
+    <head>
+        {% block head %}
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="generator" content="Pelican" />
+        <meta name="description" content="{{ SITENAME }}" />
+        <title>{% block title %} {{ SITENAME }} {% endblock %}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="/assets/output.css" />
+        <link
+            rel="shortcut icon"
+            href="/assets/favicon.svg"
+            type="image/x-icon"
+        />
+        {% endblock head %}
+    </head>
+
+    <body class="bg-lime">
+        {% block content %} {% endblock %}
+    </body>
+</html>

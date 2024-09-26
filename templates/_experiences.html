@@ -1,0 +1,53 @@
+<div class="mt-8 md:max-w-4xl">
+    <h1
+        class="text-4xl text-olive-drab font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
+    >
+        Experience
+    </h1>
+    <p class="mt-6 text-lg text-olive-drab">
+        My professional experience related to software engineering.
+    </p>
+    <div class="py-8">
+        <div class="md:border-l md:border-laurel-green md:pl-6">
+            {% for job in experience %}
+            <div class="mt-8 md:flex">
+                <div
+                    class="w-48 font-bold text-wenge leading-8 tracking-normal"
+                >
+                    <span>{{ job.start_date }} - </span>
+                    {% if loop.index0 == 0 %}
+                    <span>Current</span>
+                    {% else %}
+                    <span v-else>{{ job.end_date }}</span>
+                    {% endif %}
+                </div>
+                <div class="md:max-w-lg lg:max-w-2xl md:pl-8">
+                    <h3 class="text-xl text-olive-drab font-bold leading-8">
+                        <a
+                            href="{{ job.href }}"
+                            target="_blank">
+                            <span >{{ job.firm }}</span>
+                        </a>
+                    </h3>
+                    <h3 class="text-base text-olive-drab font-medium pb-2 leading-8">
+                        {% for tech in job.technologies %}
+                        <i>{% if loop.last %} {{ tech }} {% else %} {{ tech }}, {% endif %}</i>
+                        {% endfor %}
+                    </h3>
+                    {% for phase in job.phases %}
+                    <div
+                        class="text-normal md:text-lg"
+                        v-bind:class="[index != 0  ? 'mt-4' : '']"
+                    >
+                        <h4 class="font-extrabold text-jet">{{ phase.title }}</h4>
+                        <p class="text-olive-drab text-base">
+                            {{ phase.description }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
