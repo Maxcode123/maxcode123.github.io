@@ -31,6 +31,8 @@ experience = [
         "technologies": [
             "Python",
             "microservices",
+            "Docker",
+            "FastAPI",
             "Azure AKS",
         ],
         "phases": [
