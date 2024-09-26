@@ -1,0 +1,2 @@
+staticjinja >= 5.0.0, < 6
+ghp-import >= 2.1.0, < 3
