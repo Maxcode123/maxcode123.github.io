@@ -116,6 +116,16 @@ mail = {
     "vbox": "0 0 16 16",
 }
 
+
+blogs = [
+    {
+        "title": "Python: Concise unit tests",
+        "subtitle": "Testing with unittest-extensions",
+        "date": "Feb 24, 2024",
+        "link": "https://medium.com/@nikiforos_59437/python-concise-unit-tests-fe4b5c0ebebd",
+    }
+]
+
 if __name__ == "__main__":
     site = Site.make_site(env_globals=locals(), outpath="output")
     site.render(use_reloader=True)
