@@ -16,3 +16,6 @@ run-server:
 
 publish-site:
 	ghp-import -b gh-pages output
+
+clean:
+	rm -rf output/*
