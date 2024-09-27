@@ -1,0 +1,29 @@
+<div class="mt-8">
+    <div class="py-8">
+        <h1 class="text-4xl text-olive-drab font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            Blog posts
+        </h1>
+        <p class="mt-6 text-lg text-olive-drab">
+            Posts that I've written.
+        </p>
+    </div>
+    <div class="py-8">
+        {% for blog in blogs %}
+        <div class="md:flex">
+            <div class="md:max-w-lg lg:max-w-2xl">
+                <div class="py-2">
+                    <h4 class="text-xl text-wenge">{{ blog.date }} </h4>
+                </div>
+                <a href="{{blog.link}}" target="_blank">
+                    <h3 class="pb-2 text-4xl text-olive-drab font-bold leading-8">
+                        {{ blog.title }}
+                    </h3>
+                    <h3 class="text-lg text-olive-drab font-medium pb-2 leading-8">
+                        {{ blog.subtitle }}
+                    </h3>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
