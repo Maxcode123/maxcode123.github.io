@@ -123,7 +123,13 @@ blogs = [
         "subtitle": "Testing with unittest-extensions",
         "date": "Feb 24, 2024",
         "link": "https://medium.com/@nikiforos_59437/python-concise-unit-tests-fe4b5c0ebebd",
-    }
+    },
+    {
+        "title": "C for Python",
+        "subtitle": "Building a dictionary type",
+        "date": "Oct 15, 2024",
+        "link": "https://medium.com/@nikiforos_59437/c-for-python-building-a-dictionary-type-e09146ef052f",
+    },
 ]
 
 if __name__ == "__main__":
