@@ -5,11 +5,21 @@ DEFAULT_LANG = "en"
 
 experience = [
     {
+        "firm": "Dialectica",
+        "href": "https://dialecticanet.com/",
+        "location": "Athens, Greece",
+        "start_date": "12/2024",
+        "end_date": None,
+        "title": "Backend Software Engineer",
+        "technologies": ["Ruby", "Hanami"],
+        "phases": []
+    },
+    {
         "firm": "Skroutz",
         "href": "https://www.skroutz.gr/?lang=en",
         "location": "Athens, Greece",
         "start_date": "10/2023",
-        "end_date": None,
+        "end_date": "11/2024",
         "title": "Backend Software Engineer",
         "technologies": ["Ruby on Rails"],
         "phases": [
