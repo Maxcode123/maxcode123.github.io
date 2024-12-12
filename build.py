@@ -12,7 +12,12 @@ experience = [
         "end_date": None,
         "title": "Backend Software Engineer",
         "technologies": ["Ruby", "Hanami"],
-        "phases": []
+        "phases": [
+            {
+                "title": "Backend Software Engineer",
+                "description": ""
+            }
+        ]
     },
     {
         "firm": "Skroutz",
