@@ -11,11 +11,11 @@ experience = [
         "start_date": "12/2024",
         "end_date": None,
         "title": "Backend Software Engineer",
-        "technologies": ["Ruby", "Hanami"],
+        "technologies": ["Hanami", "Ruby on Rails", "Go"],
         "phases": [
             {
                 "title": "Backend Software Engineer",
-                "description": ""
+                "description": """Currently working in the AI team where we build an interviewing system."""
             }
         ]
     },
@@ -30,7 +30,7 @@ experience = [
         "phases": [
             {
                 "title": "Backend Software Engineer",
-                "description": """I am part of the Marketplace team where I work on 
+                "description": """Was part of the Marketplace team where I worked on 
                 adding new features to the ecommerce platform and integrating new
                  3rd-party services.""",
             }
@@ -45,10 +45,7 @@ experience = [
         "title": "Software Engineer",
         "technologies": [
             "Python",
-            "microservices",
-            "Docker",
             "FastAPI",
-            "Azure AKS",
         ],
         "phases": [
             {
