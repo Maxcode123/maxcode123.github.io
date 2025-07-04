@@ -42,11 +42,8 @@ experience = [
         "location": "Athens, Greece",
         "start_date": "01/2021",
         "end_date": "08/2023",
-        "title": "Software Engineer",
-        "technologies": [
-            "Python",
-            "FastAPI",
-        ],
+        "title": "Associate Software Engineer",
+        "technologies": ["Python"],
         "phases": [
             {
                 "title": "Software Engineer",
