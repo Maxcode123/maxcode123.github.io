@@ -46,7 +46,7 @@ experience = [
         "technologies": ["Python"],
         "phases": [
             {
-                "title": "Software Engineer",
+                "title": "Associate Software Engineer",
                 "description": """I designed, developed and maintained a series of 
                 microservices related to shipping market insights. I also contributed to
                 some of the company's internal tools as a maintainer of a Python library.""",
