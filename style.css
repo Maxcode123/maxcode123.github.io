@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'GFS Solomos';
+  src: url('fonts/GFSSolomos.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -74,6 +81,8 @@ nav {
    HOME
 ════════════════════════ */
 .home-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid var(--rule);
 }
 .home-left {
@@ -81,6 +90,43 @@ nav {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-right: 1px solid var(--rule);
+}
+.home-right {
+  padding: 3.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.home-poem-label {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--mid);
+  margin-bottom: 1.5rem;
+}
+.home-poem {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.home-poem p {
+  font-family: 'GFS Solomos', serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 2.1;
+  color: var(--ink);
+  margin: 0;
+}
+.home-poem-attribution {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--mid);
+  font-weight: 300;
+  margin-top: 1.2rem;
 }
 .home-eyebrow {
   font-family: 'IBM Plex Mono', monospace;
@@ -674,6 +720,7 @@ footer {
 @media (max-width: 700px) {
   nav { padding: 1rem 1.2rem; }
   .nav-links { gap: 1.2rem; }
+  .home-split,
   .cv-banner,
   .cv-body,
 .projects-banner,
@@ -688,7 +735,8 @@ footer {
   footer { grid-template-columns: 1fr; }
   .footer-left { border-right: none; border-bottom: 1px solid var(--rule); padding: 1.5rem 1.2rem; }
   .footer-right { justify-content: flex-start; padding: 1.5rem 1.2rem; }
-  .home-left, .blog-banner-left, .cv-banner-left { padding: 2.5rem 1.2rem; }
+  .home-left, .home-right, .blog-banner-left, .cv-banner-left { padding: 2.5rem 1.2rem; }
+  .home-left { border-right: none; border-bottom: 1px solid var(--rule); }
   .archive-row, .archive-header { padding: 1rem 1.2rem; }
   .cv-banner-right { padding: 2rem 1.2rem; }
 }
