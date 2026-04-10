@@ -202,7 +202,7 @@ nav {
 ════════════════════════ */
 .cv-banner {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   border-bottom: 1px solid var(--rule);
 }
 .cv-banner-left {
@@ -211,7 +211,7 @@ nav {
 }
 .cv-eyebrow {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--mid);
@@ -231,13 +231,13 @@ nav {
   background: var(--off);
   padding: 3rem 2.5rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem 2rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
   align-content: center;
 }
 .cv-contact-key {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--mid);
@@ -246,18 +246,22 @@ nav {
   margin-bottom: 0.15rem;
 }
 .cv-contact-val {
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   color: var(--ink);
   font-weight: 400;
 }
-.cv-body {
-  display: grid;
-  grid-template-columns: 200px 1fr;
+.cv-contact-val a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.05rem;
+  transition: color 0.15s, border-color 0.15s;
 }
-.cv-sidebar {
-  padding: 2.5rem 0 2.5rem 2.5rem;
-  border-right: 1px solid var(--rule);
+.cv-contact-val a:hover {
+  color: var(--accent, #555);
+  border-bottom-color: currentColor;
 }
+.cv-body { display: block; }
 .cv-main-col { padding: 2.5rem; }
 
 .cv-aside-block { margin-bottom: 2.5rem; }
@@ -303,7 +307,7 @@ nav {
 .cv-section { margin-bottom: 3rem; }
 .cv-section-title {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--mid);
@@ -320,34 +324,50 @@ nav {
 }
 .role-date {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   color: var(--mid);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;
   padding-top: 0.2rem;
 }
 .role-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.05rem;
+  font-size: 1.18rem;
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 0.15rem;
 }
 .role-co {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.6rem;
+  font-size: 0.78rem;
   letter-spacing: 0.1em;
   color: var(--mid);
-  font-weight: 300;
+  font-weight: 400;
   margin-bottom: 0.75rem;
 }
 .role-desc {
-  font-size: 0.84rem;
+  font-size: 0.94rem;
   line-height: 1.85;
   color: #555;
   font-weight: 300;
 }
 .role-desc li { margin-left: 1.1rem; margin-bottom: 0.25rem; }
+
+.role-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+.role-skill-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--mid);
+  border: 1px solid var(--rule);
+  padding: 0.2rem 0.55rem;
+}
 
 .cv-edu-row {
   display: grid;
@@ -357,23 +377,32 @@ nav {
 }
 .edu-year {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   color: var(--mid);
-  font-weight: 300;
+  font-weight: 400;
   padding-top: 0.2rem;
 }
 .edu-degree {
   font-family: 'Playfair Display', serif;
-  font-size: 0.98rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 0.1rem;
 }
 .edu-school {
-  font-size: 0.8rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--mid);
+  font-weight: 400;
+  margin-bottom: 0.3rem;
+}
+.edu-grade {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
   color: var(--mid);
   font-weight: 300;
-  font-style: italic;
 }
 
 /* ════════════════════════
@@ -702,8 +731,7 @@ footer {
   .home-left { border-right: none; border-bottom: 1px solid var(--rule); }
   .home-right { border-top: none; }
   .cv-banner-left { border-right: none; border-bottom: 1px solid var(--rule); }
-  .cv-sidebar { border-right: none; border-bottom: 1px solid var(--rule); padding: 2rem 1.2rem; }
-  .cv-main-col { padding: 2rem 1.2rem; }
+.cv-main-col { padding: 2rem 1.2rem; }
   .projects-banner-left { border-right: none; border-bottom: 1px solid var(--dark-rule); }
   .projects-banner-right { padding: 2rem 1.2rem; }
   .project-card { border-right: none; }
