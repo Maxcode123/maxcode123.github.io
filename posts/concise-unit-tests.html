@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Concise unit tests — Maximos Nikiforakis</title>
+  <meta name="description" content="Testing with unittest-extensions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <a class="nav-logo nav-logo--mono" href="../index.html">~/blog/posts/concise-unit-tests</a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Feb 24, 2024</p>
+      <h1 class="post-title">Concise unit tests</h1>
+      <p class="post-subtitle">Testing with unittest-extensions</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>I consider testing to be a prerequisite of quality software. However, testing code can be challenging, especially if the code is not well designed. Prior to testing your code it is good to think about how it should be structured so that it is actually testable.</p>
+
+      <h2 id="how-to-write">How should I write my unit tests?</h2>
+      <p>When developing software in Python I often found myself struggling with unit tests. Understanding what behaviour was being asserted and what data was being set up to support it took more time than it should. Although this was because of badly written tests, it is easier than you think to include unnecessary information in your test cases.</p>
+      <p>This clutter mainly comes from code that creates objects, sets state, or does some work needed before the actual assertion. I believe a unit test should be as minimal as possible — containing only the assertion. Object creation and data input should be delegated to test-infrastructure code. While you can write your own, that is what libraries are for.</p>
+
+      <h2 id="prototype">The prototype of unittest-extensions</h2>
+      <p>After working with Ruby on Rails and its RSpec testing framework for a while, I thought it would be cool to have something similar in Python. So I started creating a minimal library that extends Python's standard <code>unittest</code>. I don't expect this small extension to be as broad or successful as RSpec — I developed it to use in my own personal projects where I wanted this testing style.</p>
+
+      <h2 id="example">Example</h2>
+      <p>Suppose you have a simple <code>User</code> class:</p>
+      <pre><code>from dataclasses import dataclass
+
+@dataclass
+class User:
+    name: str
+    surname: str
+
+    def is_relative_to(self, user: "User") -> bool:
+        return self.surname.casefold() == user.surname.casefold()</code></pre>
+      <p>This is a dummy example — don't focus on the implementation, only on how to test it. Say we'd like to test <code>is_relative_to</code>.</p>
+
+      <h3>With unittest</h3>
+      <pre><code>from unittest import main, TestCase
+
+class TestIsRelativeToSameName(TestCase):
+    def test_same_name(self):
+        user1 = User("Niklas", "Strindberg")
+        user2 = User("Niklas", "Ibsen")
+        self.assertFalse(user1.is_relative_to(user2))
+
+    def test_same_empty_name(self):
+        user1 = User("", "Strindberg")
+        user2 = User("", "Ibsen")
+        self.assertFalse(user1.is_relative_to(user2))
+
+class TestIsRelativeToSameSurname(TestCase):
+    def test_same_surname(self):
+        user1 = User("August", "Nietzsche")
+        user2 = User("Henrik", "Nietzsche")
+        self.assertTrue(user1.is_relative_to(user2))
+
+    def test_same_empty_surname(self):
+        user1 = User("August", "")
+        user2 = User("Henrik", "")
+        self.assertTrue(user1.is_relative_to(user2))
+
+    def test_same_surname_case_sensitive(self):
+        user1 = User("August", "NiEtZsChE")
+        user2 = User("Henrik", "nietzsche")
+        self.assertTrue(user1.is_relative_to(user2))
+
+    def test_surname1_contains_surname2(self):
+        user1 = User("August", "Solzenietzsche")
+        user2 = User("Henrik", "Nietzsche")
+        self.assertFalse(user1.is_relative_to(user2))
+
+if __name__ == "__main__":
+    main()</code></pre>
+      <p>Each test method contains two lines where the objects are created — this is the information clutter. The only data we really care about in the first test case is the names, and in the second it's the surnames. Imagine a more realistic <code>User</code> class with dozens of attributes: would we have to witness the creation of fully populated objects in every test method? Even with factory methods, we're still providing unneeded information. The reader should not care about how objects are constructed, only that they are valid.</p>
+      <p>The point is that, in the second test case, the only things a reader wants to see are <code>surname1</code>, <code>surname2</code>, and the assertion. It is the test-writer's responsibility to relieve readers of everything else.</p>
+
+      <h3>With unittest-extensions</h3>
+      <pre><code>from unittest import main
+from unittest_extensions import TestCase, args
+
+class TestIsRelativeToSameName(TestCase):
+    def subject(self, name1, name2):
+        return User(name1, "Strindberg").is_relative_to(User(name2, "Ibsen"))
+
+    @args({"name1": "Niklas", "name2": "Niklas"})
+    def test_same_name(self):
+        self.assertResultFalse()
+
+    @args({"name1": "", "name2": ""})
+    def test_same_empty_name(self):
+        self.assertResultFalse()
+
+class TestIsRelativeToSameSurname(TestCase):
+    def subject(self, surname1, surname2):
+        return User("August", surname1).is_relative_to(User("Henrik", surname2))
+
+    @args({"surname1": "Nietzsche", "surname2": "Nietzsche"})
+    def test_same_surname(self):
+        self.assertResultTrue()
+
+    @args({"surname1": "", "surname2": ""})
+    def test_same_empty_surname(self):
+        self.assertResultTrue()
+
+    @args({"surname1": "NiEtZsChE", "surname2": "Nietzsche"})
+    def test_same_surname_case_sensitive(self):
+        self.assertResultTrue()
+
+    @args({"surname1": "Nietzsche", "surname2": "Solszenietzsche"})
+    def test_surname2_contains_surname1(self):
+        self.assertResultFalse()
+
+if __name__ == "__main__":
+    main()</code></pre>
+      <p>Examining each test method here, you are not busied with how the objects are created — only with the relevant attributes and the assertion.</p>
+
+      <h2 id="conclusion">Conclusion</h2>
+      <p><code>unittest-extensions</code> does not provide a wide range of new functionality, nor does it promise to liberate you from thinking hard about how to test your code. It merely guides you toward writing tests that are more concise, readable, and clear.</p>
+    </div>
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#how-to-write">How should I write my unit tests?</a>
+      <a href="#prototype">The prototype of unittest-extensions</a>
+      <a href="#example">Example</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

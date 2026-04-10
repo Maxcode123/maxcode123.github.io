@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C for Python — Maximos Nikiforakis</title>
+  <meta name="description" content="Building a dictionary type in C for Python." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <a class="nav-logo nav-logo--mono" href="../index.html">~/blog/posts/c-for-python</a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Oct 15, 2024</p>
+      <h1 class="post-title">C for Python</h1>
+      <p class="post-subtitle">Building a dictionary type</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>I once wondered: how does Python implement its <code>dict</code> type? I went on to look at the CPython source code (<code>Objects/dictobject.c</code>) and thought it would be cool to create my own dictionary type in C for Python. The builtin <code>dict</code> type supports various functionalities that would be copious to implement in a new data type, but it's not that hard to build a simple type that supports key insertion and lookup with the C API. So let's do it.</p>
+      <p>The resources I followed are the C API documentation, the tutorial about extending Python with C, and the CPython source code. The dictionary type I built is the simplest possible — my intention was to interact with the C API, not to create an optimized data type. Our dictionary will use a linked list and a sequential search algorithm to implement insertion and lookup. You can find the source code in the GitHub repository.</p>
+
+      <h2 id="linked-list">The underlying linked list</h2>
+      <p>Each node of the linked list will correspond to a dictionary entry, i.e. a key and a value. Because our dictionary will accept any hashable Python object as key, the nodes will also hold the hash of the key object. Lastly, because the nodes are linked, each node will hold a pointer to the next one.</p>
+      <p>Here's the header file <code>node.h</code> for the node type:</p>
+      <pre><code>#pragma once
+
+#define PY_SSIZE_T_CLEAN
+#include &lt;Python.h&gt;
+
+// Node of linked-list used for sequential-search dictionary implementation.
+// This struct is not a Python object.
+typedef struct _SSDictNode {
+  PyObject *key;
+  Py_hash_t key_hash; // Any hashable Python object can be a key
+  PyObject *value;    // Any Python object can be a value
+  struct _SSDictNode *next;
+} SSDictNode;
+
+void SSDictNode_dealloc(SSDictNode *self);
+SSDictNode *SSDictNode_new();
+void SSDictNode_init(SSDictNode *self, PyObject *key, PyObject *value);</code></pre>
+      <p><code>SSDictNode</code> is not actually a Python object — we don't need to expose it to Python; it merely serves as an underlying data type. We've also defined signatures for functions to create, initialize, and deallocate <code>SSDictNode</code> structs.</p>
+      <p>And the corresponding implementation file <code>node.c</code>:</p>
+      <pre><code>#include "node.h"
+
+void SSDictNode_dealloc(SSDictNode *self) {
+  Py_XDECREF(self->key);
+  Py_XDECREF(self->value);
+}
+
+SSDictNode *SSDictNode_new() {
+  SSDictNode *self = (SSDictNode *)PyMem_RawMalloc(sizeof(SSDictNode));
+  if (self == NULL) {
+    PyErr_SetString(PyExc_MemoryError,
+                    "failed to allocate memory for SSDict node");
+    return NULL;
+  }
+
+  self->key = NULL;
+  self->key_hash = -1; // a real hash could never be -1
+  self->value = NULL;
+
+  return self;
+}
+
+void SSDictNode_init(SSDictNode *self, PyObject *key, PyObject *value) {
+  Py_hash_t hash = PyObject_Hash(key);
+
+  if (hash == -1) {
+    PyObject_HashNotImplemented(key);
+    return;
+  }
+
+  self->key = Py_NewRef(key);
+  self->key_hash = hash;
+  self->value = Py_NewRef(value);
+}</code></pre>
+      <p><code>SSDictNode_dealloc</code> does not actually free the node because we want to ensure we have the pointer to the next node before doing so. The actual freeing is performed outside the scope of this function, where nodes are freed sequentially.</p>
+
+      <h2 id="dictionary-type">The dictionary type</h2>
+      <p>Let's move on to the actual dictionary Python object. Here's the header file <code>ssdict.h</code>:</p>
+      <pre><code>#pragma once
+
+#define PY_SSIZE_T_CLEAN
+#include &lt;Python.h&gt;
+#include "node.h"
+
+typedef unsigned int dict_size;
+
+typedef struct {
+  PyObject_HEAD SSDictNode *head;
+  dict_size size;
+} SSDict;
+
+PyObject *SSDict__new__(PyTypeObject *type, PyObject *args, PyObject *kwds);
+int       SSDict__init__(PyObject *self);
+PyObject *SSDict__getitem__(PyObject *self, PyObject *key);
+void      SSDict_dealloc(SSDict *self);
+int       SSDict_assign_value(PyObject *_self, PyObject *key, PyObject *value);
+int       SSDict_len(PyObject *_self);
+int       SSDict__contains__(PyObject *_self, PyObject *key);
+
+static void SSDict_replace_node_value(SSDictNode *node, PyObject *value);
+static void SSDict_add_new_node(SSDict *self, PyObject *key, PyObject *value);
+static int  SSDict_delete_item(SSDict *self, PyObject *key);
+static int  SSDict_delete_head_node(SSDict *self);
+static int  SSDict_delete_body_node(SSDict *self, Py_hash_t hash);
+static int  SSDict_set_item(SSDict *self, PyObject *key, PyObject *value);</code></pre>
+      <p><code>SSDict</code> is our dictionary Python object. Its only C attributes are the head of the linked list and the size. Every non-<code>static</code> function will get mapped to a Python method.</p>
+      <p>The implementation file <code>ssdict.c</code>:</p>
+      <pre><code>#include "ssdict.h"
+
+PyObject *SSDict__new__(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+  SSDict *self = (SSDict *)type->tp_alloc(type, 0);
+  return (PyObject *)self;
+}
+
+int SSDict__init__(PyObject *self) {
+  SSDict *dict = (SSDict *)self;
+  dict->head = NULL;
+  dict->size = 0;
+  return 0;
+}
+
+PyObject *SSDict__getitem__(PyObject *self, PyObject *key) {
+  Py_hash_t hash = PyObject_Hash(key);
+  if (hash == -1) {
+    PyObject_HashNotImplemented(key);
+    return NULL;
+  }
+
+  SSDictNode *node = ((SSDict *)self)->head;
+  while (node != NULL) {
+    if (node->key_hash == hash) return node->value;
+    node = node->next;
+  }
+
+  PyErr_SetObject(PyExc_KeyError, key);
+  return NULL;
+}
+
+void SSDict_dealloc(SSDict *self) {
+  SSDictNode *node = self->head;
+  while (node != NULL) {
+    SSDictNode_dealloc(node);
+    SSDictNode *tmp = node;
+    node = node->next;
+    PyMem_RawFree(tmp);
+  }
+  Py_TYPE(self)->tp_free((PyObject *)self);
+}
+
+int SSDict_assign_value(PyObject *_self, PyObject *key, PyObject *value) {
+  SSDict *self = (SSDict *)_self;
+  return value == NULL
+    ? SSDict_delete_item(self, key)
+    : SSDict_set_item(self, key, value);
+}
+
+int SSDict_len(PyObject *_self) {
+  return ((SSDict *)_self)->size;
+}
+
+int SSDict__contains__(PyObject *_self, PyObject *key) {
+  Py_hash_t hash = PyObject_Hash(key);
+  if (hash == -1) {
+    PyObject_HashNotImplemented(key);
+    return -1;
+  }
+
+  SSDictNode *node = ((SSDict *)_self)->head;
+  while (node != NULL) {
+    if (node->key_hash == hash) return 1;
+    node = node->next;
+  }
+  return 0;
+}
+
+static void SSDict_replace_node_value(SSDictNode *node, PyObject *value) {
+  // Use a temporary to avoid decrementing the old value before incrementing
+  // the new one — the destructor triggered by decref could do bad things.
+  PyObject *tmp = node->value;
+  node->value = Py_NewRef(value);
+  Py_XDECREF(tmp);
+}
+
+static void SSDict_add_new_node(SSDict *self, PyObject *key, PyObject *value) {
+  SSDictNode *new = SSDictNode_new();
+  SSDictNode_init(new, key, value);
+  new->next = self->head;
+  self->head = new;
+  self->size++;
+}
+
+static int SSDict_delete_item(SSDict *self, PyObject *key) {
+  Py_hash_t hash = PyObject_Hash(key);
+  if (hash == -1) {
+    PyObject_HashNotImplemented(key);
+    return -1;
+  }
+
+  if (self->head->key_hash == hash)
+    return SSDict_delete_head_node(self);
+
+  if (SSDict_delete_body_node(self, hash) &lt; 0) {
+    PyErr_SetObject(PyExc_KeyError, key);
+    return -1;
+  }
+  return 0;
+}
+
+static int SSDict_delete_head_node(SSDict *self) {
+  Py_XDECREF(self->head->key);
+  Py_XDECREF(self->head->value);
+
+  if (self->head->next == NULL) {
+    free(self->head);
+    self->head = NULL;
+    self->size = 0;
+  } else {
+    SSDictNode *tmp = self->head;
+    self->head = self->head->next;
+    free(tmp);
+    self->size--;
+  }
+  return 0;
+}
+
+static int SSDict_delete_body_node(SSDict *self, Py_hash_t hash) {
+  SSDictNode *before = self->head;
+  SSDictNode *current = before->next;
+
+  while (current != NULL) {
+    if (current->key_hash == hash) {
+      before->next = current->next;
+      Py_XDECREF(current->key);
+      Py_XDECREF(current->value);
+      free(current);
+      self->size--;
+      return 0;
+    }
+    before = current;
+    current = current->next;
+  }
+  return -1;
+}
+
+static int SSDict_set_item(SSDict *self, PyObject *key, PyObject *value) {
+  Py_hash_t hash = PyObject_Hash(key);
+  if (hash == -1) {
+    PyObject_HashNotImplemented(key);
+    return -1;
+  }
+
+  SSDictNode *node = self->head;
+  while (node != NULL) {
+    if (node->key_hash == hash) {
+      SSDict_replace_node_value(node, value);
+      return 0;
+    }
+    node = node->next;
+  }
+
+  SSDict_add_new_node(self, key, value);
+  return 0;
+}</code></pre>
+      <p>Having defined the dictionary type and its methods, we're left with wiring up the module with the C API. For our type to act as a mapping in Python we need a <code>PyMappingMethods</code> struct. For <code>key in dict</code> to work we also need to set <code>sq_contains</code> on <code>PySequenceMethods</code>.</p>
+      <p><code>definitions.c</code>:</p>
+      <pre><code>#define PY_SSIZE_T_CLEAN
+#include &lt;Python.h&gt;
+#include "ssdict.h"
+
+static PyMethodDef SSDict_methods[] = {
+    {"__getitem__", SSDict__getitem__, METH_O | METH_COEXIST,
+     "Get an item from the dictionary"},
+    {NULL}
+};
+
+static PyMappingMethods SSDict_mappingmethods = {
+    .mp_length       = (lenfunc)SSDict_len,
+    .mp_subscript    = SSDict__getitem__,
+    .mp_ass_subscript = SSDict_assign_value,
+};
+
+static PySequenceMethods SSDict_sequencemethods = {
+    .sq_contains = SSDict__contains__,
+};
+
+static PyTypeObject SSDictType = {
+    .ob_base    = PyVarObject_HEAD_INIT(NULL, 0),
+    .tp_name    = "dictionaries.SSDict",
+    .tp_doc     = PyDoc_STR("Dictionary using a sequential-search linked list."),
+    .tp_basicsize = sizeof(SSDict),
+    .tp_flags   = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
+    .tp_new     = SSDict__new__,
+    .tp_init    = (initproc)SSDict__init__,
+    .tp_dealloc = (destructor)SSDict_dealloc,
+    .tp_methods = SSDict_methods,
+    .tp_as_mapping  = &SSDict_mappingmethods,
+    .tp_as_sequence = &SSDict_sequencemethods,
+    .tp_hash    = PyObject_HashNotImplemented,
+};
+
+static PyModuleDef dictionariesmodule = {
+    .m_base = PyModuleDef_HEAD_INIT,
+    .m_name = "dictionaries",
+    .m_doc  = "Dictionary types.",
+    .m_size = -1,
+};
+
+PyMODINIT_FUNC PyInit_dictionaries(void) {
+  if (PyType_Ready(&SSDictType) &lt; 0) return NULL;
+
+  PyObject *module = PyModule_Create(&dictionariesmodule);
+  if (module == NULL) return NULL;
+
+  Py_INCREF(&SSDictType);
+  if (PyModule_AddObject(module, "SSDict", (PyObject *)&SSDictType) &lt; 0) {
+    Py_DECREF(&SSDictType);
+    Py_DECREF(module);
+    return NULL;
+  }
+
+  return module;
+}</code></pre>
+
+      <h2 id="building">Building the module</h2>
+      <p>We'll build the module using pip with <code>pyproject.toml</code> and <code>setup.py</code> for configuration. All C files live under <code>src/ssdict/</code>.</p>
+      <h3>pyproject.toml</h3>
+      <pre><code>[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dictionaries"
+version = "0.1.0"</code></pre>
+      <h3>setup.py</h3>
+      <pre><code>from setuptools import Extension, setup
+
+setup(
+    ext_modules=[
+        Extension(
+            "dictionaries",
+            sources=[
+                "src/ssdict/ssdict.c",
+                "src/ssdict/node.c",
+                "src/ssdict/definitions.c",
+            ],
+            include_dirs=["src/ssdict"],
+        )
+    ]
+)</code></pre>
+      <p>Install the extension from the directory containing <code>pyproject.toml</code>:</p>
+      <pre><code>pip install -e .</code></pre>
+      <p>This creates a shared object (<code>.so</code>) file and an <code>.egg-info</code> file in the <code>src</code> directory.</p>
+
+      <h2 id="example">Running an example</h2>
+      <p>After installing, append the path to the <code>.so</code> file to your <code>PYTHONPATH</code>, then try it out:</p>
+      <h3>example.py</h3>
+      <pre><code>from dictionaries import SSDict
+
+d = SSDict()
+
+d[object()] = "123"
+d[3] = object()
+d[3] = 5
+d["mykey"] = "myvalue"
+
+print("\nSet items successfully!\n")
+print(f"d[3] = {d[3]}\n")
+print(f"dictionary length = {len(d)}\n")
+print(f'"mykey" in d = {"mykey" in d}\n')</code></pre>
+      <p>Output:</p>
+      <pre><code>Set items successfully!
+
+d[3] = 5
+
+dictionary length = 3
+
+"mykey" in d = True</code></pre>
+
+      <h2 id="testing">Testing the dictionary type</h2>
+      <p>Running a quick example is fine, but a proper test suite is better. The example below uses my own <code>unittest-extensions</code> library.</p>
+      <h3>test.py</h3>
+      <pre><code>import unittest
+from unittest_extensions import TestCase, args
+from dictionaries import SSDict
+
+class TestSSDict(TestCase):
+    def dict(self) -> SSDict:
+        return self._dict
+
+    def setUp(self):
+        self._dict = SSDict()
+
+class TestSSDictSubscript(TestSSDict):
+    def subject(self, key):
+        return self.dict()[key]
+
+    @args(2)
+    def test_unset_item(self):
+        self.assertResultRaises(KeyError)
+
+    @args(1)
+    def test_set_item(self):
+        self.dict().__setitem__(1, 11)
+        self.assertResult(11)
+
+    @args({1})
+    def test_unset_unhashable_item(self):
+        self.assertResultRaises(TypeError)
+
+class TestSSDictAssSubscript(TestSSDict):
+    def subject(self, key, value):
+        self.dict()[key] = value
+        return self.dict()
+
+    @args({1}, 1)
+    def test_unhashable_key(self):
+        self.assertResultRaises(TypeError)
+
+    @args(12, [1, 2, 3])
+    def test_new_key(self):
+        self.assertEqual(self.result().__getitem__(12), [1, 2, 3])
+
+    @args("a", "b")
+    def test_existent_key(self):
+        self.dict().__setitem__("a", "aa")
+        self.assertEqual(self.result().__getitem__("a"), "b")
+
+class TestSSDictLength(TestSSDict):
+    def subject(self):
+        return len(self.dict())
+
+    def add_item(self, key=1, value=1):
+        self.dict().__setitem__(key, value)
+
+    def test_empty_dict(self):    self.assertResult(0)
+    def test_one_item(self):      self.add_item(); self.assertResult(1)
+    def test_add_same_item(self): self.add_item(); self.add_item(); self.assertResult(1)
+    def test_add_different_items(self): self.add_item(); self.add_item(2); self.assertResult(2)
+
+class TestSSDictContains(TestSSDict):
+    def subject(self, key):
+        return key in self.dict()
+
+    @args("a")
+    def test_key_not_in_dict(self):
+        self.assertResultFalse()
+
+    @args("a")
+    def test_key_in_dict(self):
+        self.dict().__setitem__("a", 1)
+        self.assertResultTrue()
+
+    @args({1})
+    def test_unhashable_item(self):
+        self.assertResultRaises(TypeError)
+
+if __name__ == "__main__":
+    unittest.main()</code></pre>
+
+      <h2 id="conclusion">Conclusion</h2>
+      <p>Implementing a simple data type with C for Python is not that hard. However, making a production-ready type requires consideration of things like thread-safety and reference counting edge cases.</p>
+      <p>If you want to make something run faster by implementing it in C, think carefully before going down that path. The builtin data structures of Python are heavily optimized — you'd have to put in a lot of effort to build something that actually beats them.</p>
+    </div>
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#linked-list">The underlying linked list</a>
+      <a href="#dictionary-type">The dictionary type</a>
+      <a href="#building">Building the module</a>
+      <a href="#example">Running an example</a>
+      <a href="#testing">Testing the dictionary type</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
