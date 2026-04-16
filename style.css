@@ -337,6 +337,25 @@ nav {
   font-weight: 400;
   margin-bottom: 0.75rem;
 }
+.role-content {
+  position: relative;
+}
+.role-co-logo-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.role-co-logo {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+.role-co-logo:hover {
+  opacity: 1;
+}
 .role-desc {
   font-size: 0.94rem;
   line-height: 1.85;
@@ -557,6 +576,29 @@ nav {
   padding: 0;
   font-size: 0.82rem;
   line-height: 1.7;
+}
+.post-quote {
+  margin: 2rem 0;
+  padding: 1.4rem 1.8rem;
+  border-left: 3px solid var(--ink);
+  background: var(--off);
+}
+.post-quote p {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 0.5rem;
+  color: var(--ink);
+}
+.post-quote p:last-of-type { margin-bottom: 0.8rem; }
+.post-quote cite {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-style: normal;
+  font-size: 0.62rem;
+  color: var(--mid);
+  letter-spacing: 0.04em;
 }
 .post-toc {
   position: sticky;

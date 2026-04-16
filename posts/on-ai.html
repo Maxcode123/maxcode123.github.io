@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>On AI — Maximos Nikiforakis</title>
+  <meta name="description" content="Thoughts about software development." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <span class="nav-logo nav-logo--mono"><a href="../index.html">~</a>/<a href="../blog.html">blog</a>/posts/on-ai</span>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Apr 18, 2026</p>
+      <h1 class="post-title">On AI</h1>
+      <p class="post-subtitle">Thoughts about software development</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>When AI was first introduced to our lives with tools like ChatGPT and Copilot I was not that impressed with its' capabilities regarding coding. The former, could indeed give you code based on a description - technical or not - but it lacked coherence and would usually not run if copy-pasted as is. The latter, similarly because of poor code generation capabilities did not prove to be a trustworthy coding companion and rather ended up being more of an unskilled cooperator that needed your attention to work properly.</p>
+
+      <h2 id="current-state">Current state</h2>
+      <p>By now, AI tools can generate code with quality; meaning that given a description they can generate code that looks good and works as expected if ran - and if I'm honest, is better than the code I would have written. Furthermore, tools like Claude Code and Cursor can "digest" a codebase and produce code that fits inside that codebase, but they can also be configured and guided on how to reason and go about solving problems. These facts, namely qualitative code generation, configurability and codebase adaptability, bring us to the current state where agent-enhanced software development can be an order of magnitude faster than before. Having said that, the question now is not if or not to use AI, but how to use it with safety and how to avoid collateral damage.</p>
+
+     <h2 id="what-is-the-cost">The cost of using AI</h2>
+     <p>A product heavily exposed to AI, meaning a product heavily relying on processes that make external calls to LLMs, can accumulate costs quickly and that's OK if it is by design, but if it is not it has to be dealt with. Ultimately, development of a serious product with AI still requires design and expertise.</p>
+     <p>Beyond costs occuring from token consumption, AI-assisted software development - just like normal development - lurks dangers like introducing bugs mostly related, but not limited to, business logic. Bugs are part of development and although their type and frequency are related to the quality of the development, I take their existence for granted. Thus we can crudely say that more development equals more bugs. This is the cost of speed; just like a fast-running car can be more dangerous, not because of its' manufacture, but because of the its' speed. The car analogy helps us understand the structure of the changes imposed by AI: we want to go from A to B and we can either use a speedy car to get there in 1 day or we can use a slow car and make the trip in 1 week. Keep in mind that the destination, i.e. the outcome, does not change, we still want to get to B. Of course everyone that wants to be productive will want to use the first option. <strong>Our responsibility then as operators shifts to ensuring the safety of the trip and we should not focus on preventing passengers from getting to their destination quickly.</strong></p>
+
+     <h2 id="guardrails">Guardrails</h2>
+     <p>We accept that speedy development does not equal unsafe development. Based on that premise, we as engineers have to figure out how to make development safer by investing in parts of our workflow other than pure development. What I find valuable is creating a solid CI pipeline, pretty much everything besides business logic and architecture should be delegated to the pipeline. Security checks, linting, formatting, integrations tests, unit tests, styling, conventions and patterns should be caught by the pipeline or by agent code review.</p>
+    <p> Moreover, optimizing the agentic code generation part is also important as it makes everything easier downstream. Configuring and instructing the agent who writes the code to follow good practices, e.g. like atomic meaningful commits and small PRs, is crucial. The developer can then focus on attributes that matter for the business and the sustainability of the codebase (architecture)</p>
+     <p>Let the agent be, just be its' guardian.</p>
+
+      <h2 id="conclusion">Conclusion</h2>
+      <p>AI is here to help us achieve more things faster. The volume and the speed both come with a price. As business operators we should embrace the new tools only if we are willing to pay the price, as individuals and as a society though we should embrace them only if we strive to become better as humans. Technology will always progress but the human race will sure not without literature, comprehension of history, art, culture, solidarity, ethos and values to adhere to. The day when generation of content is valued more than creativity and the expressiveness of one's soul is a sad day for humanity.  The era of AI should not be the era of the unhuman.</p>
+      <p>The machine should make our lives better, it should work for us; we should not work for the machine.</p>
+      <blockquote class="post-quote">
+        <p>τὸ ὑπόδημα τῷ πόδι συνδιαστρέφεται καὶ οὐ τοὐνάντιον.</p>
+        <p>the shoe takes the shape of the foot, not the other way around.</p>
+        <cite>Πλούταρχος, Περί Εὐθυμίας</cite>
+      </blockquote>
+    </div>
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#current-state">Current state</a>
+      <a href="#what-is-the-cost">The cost of using AI</a>
+      <a href="#guardrails">Guardrails</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
