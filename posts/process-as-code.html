@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Process as Code — Maximos Nikiforakis</title>
+  <meta name="description" content="Thoughts about software development." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <span class="nav-logo nav-logo--mono"><a href="../index.html">~</a>/<a href="../blog.html">blog</a>/process-as-code</span>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Apr 18, 2026</p>
+      <h1 class="post-title">Process as Code</h1>
+      <p class="post-subtitle">Creating CLIs to streamline processes</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>So I had to setup a cloud database server in order to migrate a client's data from their on-prem server. The database needed some kind of set up to make it functional for the client. During this process I had to tear down and spin up a new server instance each time I found out that my selected instance-cloud-offering did not allow me to interfere with the machine in ways I wanted to. At some point when going through this process, I realized I need to document it and I troubled myself with the question: "Where shall this writing abide?". While the provisioning of a computing instance that hosts a db server is a resource that can live in code as IaC, e.g. with Terraform, the steps I followed after the provisioning, namely creating roles, users, enabling certain server functionalities, loading some executables on the server, were something that did not belong in the IaC repository, neither on a web service that serves the business logic. What about Google Drive, Notion, a dedicated scripts repository then? Well, no; all of the aforementioned solutions would provide a means to access information, that information should be then read and acted upon. So executing an operation becomes a three step process: 1. access the information, 2. comprehend the information, 3. act based on received knowledge. For processes recurring often essentially steps 2 and 3 get automated by the human brain hence no need to worry, but for non-recurring once-off processes (i.e. recurring processes with a big period time) I felt like this whole flow carried some redundancy.</p>
+
+      <h2 id="documenting">Documenting non-recurring processes</h2>
+      <p>Documenting something means you have to read it, then go ahead and execute (copy, paste) a task based on your understanding of the documentation. Since, non-recurring processes are not frequent you probably dont remember the steps you need to take, so you read the documentation again, try to understand it again and follow the documented steps, again. The inefficiency of this flow made me think there's gotta be a better way to do this: I can write what I want to explain in plain-text documentation but I can also create something that implements it. Thus was born the idea of Process as Code (PaC), i.e. of creating a CLI tool that performs all the operations I wanted to document.
+      </p>
+
+     <h2 id="clis">CLI applications</h2>
+     <p>A CLI application can automate tasks by creating certain commands and one can always read the code of the application to inspect the logic and the steps followed for each task since code conveys human logic. Certain users might want to edit or extend the tool, but most will just want to get things done; the CLI tool serves both audiences and it's a perfect form of documenting processes that are too odd to live in text or as scripts. I used Python for my tool since it's the language I'm most comfortable with and it has a great CLI library (<a href="https://typer.tiangolo.com/">Typer</a>). The vocabulary I followed for my tool's API - let's call it setuper - is setuper {system} {resource} {action}, where system is a client's system, a resource can be the server, the db or the tool configuration and actions can be basic CRUD or specific operations. You can use an LLM to create such a tool in literally 30 minutes.
+     </p>
+     <p>
+     You don't necessarily have to skip writing documentation, you can write documentation on how to use your tool to perform certain operations or how to perform these operations using your tool. Now your documentation will include simple one line commands that the reader can just copy, paste and execute without going back and forth in the documentation.
+     </p>
+
+     <h2 id="conclusion">Conclusion</h2>
+     <p>If you find a process is non-recurring and sits one level above infra but also one level below the application, try creating a CLI tool that encapsulates all the logic for performing the operations required for this process.</p>
+     <p>Let us have faith in that a clean, simple and intuitive API will solve most of our problems.</p>
+
+    </div>
+
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#documenting">Documenting non-recurring processes</a>
+      <a href="#clis">CLI applications</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
