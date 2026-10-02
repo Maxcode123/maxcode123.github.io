@@ -677,6 +677,31 @@ nav {
   font-weight: 300;
   white-space: nowrap;
 }
+.projects-section-head {
+  padding: 2rem 2.5rem 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.projects-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.archive-url {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--mid);
+  white-space: nowrap;
+}
+.archive-row:hover .archive-url { color: var(--ink); }
+.archive-empty {
+  padding: 1.2rem 2.5rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.8rem;
+  color: var(--mid);
+  font-style: italic;
+}
 .project-langs {
   display: flex;
   align-items: center;
@@ -791,7 +816,8 @@ footer {
   .footer-right { justify-content: flex-start; padding: 1.5rem 1.2rem; }
   .home-left, .home-right, .blog-banner-left, .cv-banner-left { padding: 2.5rem 1.2rem; }
   .home-left { border-right: none; border-bottom: 1px solid var(--rule); }
-  .archive-row, .archive-header { padding: 1rem 1.2rem; }
+  .archive-row, .archive-header, .archive-empty { padding: 1rem 1.2rem; }
+  .projects-section-head { padding: 1.5rem 1.2rem 0.8rem; }
   .cv-banner-right { padding: 2rem 1.2rem; }
   .about-body { padding: 2rem 1.2rem; }
 }
