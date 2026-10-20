@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing an interpreter in Python, Part 1: Scanning — Maximos Nikiforakis</title>
+  <meta name="description" content="Writing an interpreter in Python, Software guide." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <span class="nav-logo nav-logo--mono"><a href="../index.html">~</a>/<a href="../blog.html">blog</a>/writing-an-interpreter-1</span>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Oct 20, 2026</p>
+      <h1 class="post-title">Writing an interpreter in Python</h1>
+      <p class="post-subtitle">Part 1: Scanning</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>
+      This is the first part of a series where we will write an interpreter in Python. No prior compiler experience is assumed, everything is explained from first principles. Additionally, the parts in the series can be generalized to any programming language, meaning that the tools we will use can serve the creation of any arbitrary interpreter. Thus, in this part we will not create a scanner for a specific programming language, rather we will create the functionality so the scanner can scan any source file given the tokens of a language.
+      </p>
+
+      <h2 id="regex">Regular expressions</h2>
+      <p>
+      A regular expression is a pattern that describes a multitude of strings. We need regular expression in order to recognize indentifiers in source code since variables, functions and other constructs can be arbitrarily named. For example, the below definitions are all perfectly valid in Python.
+      </p>
+
+      <pre><code>myvar = 123
+_lasmdkamdkmsakdmsakdmksadkad = "some string"</pre></code>
+
+      <p>
+      So for a scanner to be able to recognize any valid name there needs to be some way to describe the pattern of names. Similarly for numbers and strings; the possible valid options are infinite. Below are some regular expressions and the patterns they recognize.
+      </p>
+
+      <pre><code>A*          Matches A none or more times
+A+          Matches A at least once
+[0-9]       Matches any number from 0 to 9
+[a-z]       Matches any letter from a to z</pre></code>
+
+      <p>
+      A can be any letter, string or regular expression. For example, a regular expression that recognizes integer values looks like so:
+      </p>
+
+      <pre><code>[0-9]+     Matches any number from 0 to 9 at least once</pre></code>
+
+      <p>
+      And one that recognizes identifiers with alphanumerics (first letter can't be a number though) and underscores:
+      </p>
+
+      <pre><code>[a-zA-Z_][a-zA-Z0-9_]*</pre></code>
+
+     <h2 id="tokens">Tokens</h2>
+     <p>
+     The role of the scanner is to convert the source code to a stream of tokens. A token is a just a characterization for the type of the source code strings. For example identifiers, keywords (for, while, in, etc) and numbers are all tokens. We use regular expressions to define tokens and we assign a name to them.
+     </p>
+
+     <pre><code>INTEGER [0-9]+
+ID [a-zA-Z_][a-zA-Z0-9_]*
+EQ =</pre></code>
+
+     <p>
+     Having defined the above tokens, a scanner should receive the statement <code>myvar = 123</code> and convert it to <code>ID EQ INTEGER</code>.
+     </p>
+
+     <h2 id="writing-a-scanner">Writing a scanner</h2>
+     <p>
+     Summarizing thus far, scanners convert source code to tokens by using regular expressions. We need to also clarify what happens when two scanner rules (token definitions) clash with each other, for example both of the below rules recognize the <code>for</code> string, but only one of the two must prevail each time. 
+     </p>
+
+     <pre><code>FOR for
+ID [a-zA-Z_][a-zA-Z0-9_]*</pre></code>
+     <p>
+In order to resolve possible clashes we agree that rules are defined in order of priority so that the <code>FOR</code> rule is prioritized over the <code>ID</code> rule in case of a conflict.
+     </p>
+
+
+     <h2 id="scanning-with-lectes">Scanning with lectes</h2>
+
+     <h2 id="conclusion">Conclusion</h2>
+
+    </div>
+
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#regex">Regular expressions</a>
+      <a href="#tokens">Tokens</a>
+      <a href="#writing-a-scanner">Writing a scanner</a>
+      <a href="#scanning-with-lectes">Scanning with lectes</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
