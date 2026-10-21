@@ -42,7 +42,7 @@
       </p>
 
       <pre><code>myvar = 123
-_lasmdkamdkmsakdmsakdmksadkad = "some string"</pre></code>
+_lasmdkamdkmsakdmsakdmksadkad = "some string"</code></pre>
 
       <p>
       So for a scanner to be able to recognize any valid name there needs to be some way to describe the pattern of names. Similarly for numbers and strings; the possible valid options are infinite. Below are some regular expressions and the patterns they recognize.
@@ -51,19 +51,19 @@ _lasmdkamdkmsakdmsakdmksadkad = "some string"</pre></code>
       <pre><code>A*          Matches A none or more times
 A+          Matches A at least once
 [0-9]       Matches any number from 0 to 9
-[a-z]       Matches any letter from a to z</pre></code>
+[a-z]       Matches any letter from a to z</code></pre>
 
       <p>
-      A can be any letter, string or regular expression. For example, a regular expression that recognizes integer values looks like so:
+      A can be any letter, string or regular expression. For example, a regular expression that recognizes integer values (allowing leading zeros) looks like so:
       </p>
 
-      <pre><code>[0-9]+     Matches any number from 0 to 9 at least once</pre></code>
+      <pre><code>[0-9]+     Matches any number from 0 to 9 at least once</code></pre>
 
       <p>
       And one that recognizes identifiers with alphanumerics (first letter can't be a number though) and underscores:
       </p>
 
-      <pre><code>[a-zA-Z_][a-zA-Z0-9_]*</pre></code>
+      <pre><code>[a-zA-Z_][a-zA-Z0-9_]*</code></pre>
 
      <h2 id="tokens">Tokens</h2>
      <p>
@@ -72,7 +72,7 @@ A+          Matches A at least once
 
      <pre><code>INTEGER [0-9]+
 ID [a-zA-Z_][a-zA-Z0-9_]*
-EQ =</pre></code>
+EQ =</code></pre>
 
      <p>
      Having defined the above tokens, a scanner should receive the statement <code>myvar = 123</code> and convert it to <code>ID EQ INTEGER</code>.
@@ -84,13 +84,117 @@ EQ =</pre></code>
      </p>
 
      <pre><code>FOR for
-ID [a-zA-Z_][a-zA-Z0-9_]*</pre></code>
+ID [a-zA-Z_][a-zA-Z0-9_]*</code></pre>
      <p>
-In order to resolve possible clashes we agree that rules are defined in order of priority so that the <code>FOR</code> rule is prioritized over the <code>ID</code> rule in case of a conflict.
+     In order to resolve possible clashes we agree that rules are defined in order of priority so that the <code>FOR</code> rule is prioritized over the <code>ID</code> rule in case of a conflict where the matches are of equal length. Else (i.e. when the matches are not of equal length) the rule with the longest match wins. For example, the <code>FOR</code> rule should match the <code>for</code> keyword because the rule has priority, but the <code>ID</code> rule should match the <code>for13</code> string because the match is longer than that of <code>FOR</code>'s.
+     </p>
+
+     <p>
+     Now that we cleared what happens in case of a clash, let's get our hands dirty by writing some code! We'll define some structures to represent tokens and regex rules.
+     </p>
+
+     <pre><code>from dataclasses import dataclass
+import re
+
+@dataclass
+class Rule:
+    name: str
+    regex: re.Pattern
+
+    def __init__(self, name: str, regex: str) -> None:
+        self.name = name
+        self.regex = re.compile(regex)
+
+@dataclass
+class Token:
+    rule: Rule
+    literal: str</code></pre>
+
+     <p>
+     Now we can define the scanner.
+     </p>
+
+     <pre><code>from typing import Generator
+
+class _Cursor:
+    def __init__(self) -> None:
+        self.offset = 0
+
+    def advance(self, consumed: str) -> None:
+        self.offset += len(consumed)
+
+class Scanner:
+    def __init__(self, rules: list[Rule]) -> None:
+        self.rules = rules
+
+    def scan(self, text: str) -> Generator[Token]:
+        cursor = _Cursor()
+
+        while cursor.offset < len(text):
+            rule, literal = self._longest_match(text, cursor.offset)
+
+            if rule is None:
+                cursor.advance(text[cursor.offset])
+                continue
+
+            token = Token(rule, literal)
+            yield token
+            cursor.advance(literal)
+
+    def _longest_match(self, text: str, position: int) -> tuple[Rule | None, str]:
+        best_rule = None
+        best_literal = ""
+
+        for rule in self.rules:
+            literal = rule.regex.match(text, position)
+            literal = literal.group() if literal is not None else None
+
+            if literal and len(literal) > len(best_literal):
+                best_rule = rule
+                best_literal = literal
+
+        return best_rule, best_literal</code></pre>
+
+     <p>
+     The scanner receives a list of rules the order of which determines their priority and uses a cursor object to keep track of the current position (offset). Let's try it out!
+     </p>
+
+     <pre><code>rules = [
+     Rule("EQ", "="),
+     Rule("SEMICOLON", ";"),
+     Rule("INT", "[0-9]+"),
+     Rule("ID", "[a-zA-Z_][a-zA-Z0-9_]*")
+]
+
+scanner = Scanner(rules)
+text = "foo = 10; bar = 23; fiz = 33;"
+for token in scanner.scan(text):
+    print(token.rule.name)</code></pre>
+
+     <p>
+     Running the above should output:
+     <pre><code>ID          
+EQ          
+INT         
+SEMICOLON   
+ID          
+EQ          
+INT         
+SEMICOLON   
+ID          
+EQ          
+INT         
+SEMICOLON</code></pre>
+     </p>
+
+     <p>
+     That's really it, to be honest. There's no compiler magic under the hood or anything arcane going on here, just some good ol' code that does what it's supposed to. Of course this is not a production-ready scanner, it does not track the location of the tokens or handle unmatched tokens, but it serves our purpose of demonstrating how a scanner works.
      </p>
 
 
      <h2 id="scanning-with-lectes">Scanning with lectes</h2>
+     <p>
+     </p>
 
      <h2 id="conclusion">Conclusion</h2>
 
