@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network latency — Maximos Nikiforakis</title>
+  <meta name="description" content="Troubleshooting networking latency." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <span class="nav-logo nav-logo--mono"><a href="../index.html">~</a>/<a href="../blog.html">blog</a>/network-latency</span>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Oct 22, 2026</p>
+      <h1 class="post-title">Network latency</h1>
+      <p class="post-subtitle">How much does a latency of 40ms impact you work?</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>
+      There once was a desktop application that connected to a database. Now this application was particularly chatty and enjoyed the company of the database; the two of them were inseparable and spent all their working hours on engaging on conversations. There came a time when the database had to migrate to another region far away from the beloved application. With tears in their eyes did they depart from each other and off went the little database to seek for a better life in the distant and unknown lands of Cloudia. The two of them kept in touch but their communication was not like before, it lacked the sparkness and vividness that their joint aura would impose. The absence of the database was the demise of the application, it fell sick and its' health almost immediately deteriorated so that nobody could use it anymore. 
+      </p>
+      <p>
+      Now let me tell you about the dark time I moved an on-premise database that served a legacy desktop application to the cloud...
+      </p>
+
+      <h2 id="cloud-latency">Cloud latency</h2>
+      <p>
+      Network latency from 1ms to almost 40ms.
+      150 serial queries for one entry.
+      Multiple entries processed in one batch.
+      </p>
+
+     <h2 id="back-to-on-prem">Should we move back to on-prem?</h2>
+     <p>
+     We know on-prem is super-fast, but we don't want to manage on-prem.
+     </p>
+
+     <h2 id="from-cloud-to-cloud">From one cloud to the other</h2>
+     <p>
+     Moving the db server closer to the client.
+     </p>
+
+     <h2 id="vpn">VPN</h2>
+     <p>
+     OpenVPN hub architecture.
+     Tailscale peer-to-peer architecture.
+     https://tailscale.com/blog/how-tailscale-works
+     </p>
+
+     <h2 id="conclusion">Conclusion</h2>
+
+    </div>
+
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#documenting">Documenting non-recurring processes</a>
+      <a href="#clis">CLI applications</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
