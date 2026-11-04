@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network latency — Maximos Nikiforakis</title>
+  <meta name="description" content="Troubleshooting networking latency." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="site">
+    <div class="top-rule"></div>
+
+    <nav>
+      <span class="nav-logo nav-logo--mono"><a href="../index.html">~</a>/<a href="../blog.html">blog</a>/network-latency</span>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="../cv.html">CV</a>
+        <a class="active" href="../blog.html">Blog</a>
+      </div>
+    </nav>
+
+    <div class="post-header">
+      <p class="post-eyebrow">Nov 4, 2026</p>
+      <h1 class="post-title">Network latency</h1>
+      <p class="post-subtitle">How much does a lag of 40ms impact your work?</p>
+    </div>
+
+    <div class="post-layout">
+    <div class="post-body">
+      <h2 id="introduction">Introduction</h2>
+      <p>
+      There once was a desktop application that connected to a database. Now this application was particularly chatty and enjoyed the company of the database; the two of them were inseparable and spent all their working hours on engaging on conversations. There came a time when the database had to migrate to another region far away from the beloved application. With tears in their eyes did they depart from each other and off went the little database to seek for a better life in the distant and unknown lands of Cloudia. The two of them kept in touch but their communication was not like before, it lacked the sparkness and vividness that their joint aura would impose. The absence of the database was the demise of the application, it fell sick and its' health almost immediately deteriorated so that nobody could use it anymore. 
+      </p>
+      <p>
+      Now let me tell you about the dark time I moved an on-premise database that served a legacy desktop application to the cloud...
+      </p>
+
+      <h2 id="cloud-latency">Cloud latency</h2>
+      <p>
+      As stated, the desktop application was particularly chatty with the database. For example, in a certain operation where it imported a number of records from an xml file the application issued almost 150 serial queries to the database for each record imported. One might justly voice that this operation is in need of optimization and to that I say: Good luck convincing the vendor of the legacy desktop software to optimize their application when nobody else but you faces such issues, because you're the only heathen that dared to move the application database to the cloud. So relying on software that is able to handle connections to a distributed database is unfortunately out of question. Now let me elaborate on why the migration to the cloud caused some serious latency to the users of the desktop app by doing some simple math. Previously, the application connected to the on-prem database was experiencing sub millisecond network latency (latency to open a tcp connection, not including processing time in the server or client) when reaching the database whereas when connecting to the cloud database the network latency was about 40ms. Who cares, you only need 40ms to reach the database, right? Well it seems that users do care; let's actually do the math: Suppose the xml file contains 100 records that will be imported. Initially, the total network latency for this operation was (100 recods) * (1 ms/query) *(150 queries/record) = 15000 ms = 15 s and after the migration the figure becomes (100 records) * (40 ms/query) * (150 queries/record) = 600000 ms = 600 s = 10min. That's a non-trivial change in the application experience.
+      </p>
+
+     <h2 id="back-to-on-prem">Should we move back to on-prem?</h2>
+     <p>
+     Faced with the above problem, moving back to on-prem was actually considered a solution to ensure the user experience becomes smooth once again. We knew on-prem worked, but we didnt't want to manage the on-prem database, thus began the journey to understand what stands in between the database and the application when they communicate. Two where the determining findings of this debugging venture. The first was that the region where the cloud database was hosted was geographically far away from the users albeit in the same continent, and the second was that the VPN we used to provide access to our cloud database used a hub-and-spoke topology. The former imposed a physical limit to the speed of the communication and the latter added two additional hops between the database and the application (VPC connector in the same region as the database + VPN Server managed by the VPN provider in a close-by region). The problem was clear (at least in hindsight) so we tried the solution that dealt with it, namely move the database closer to the users and use a VPN that offers peer-to-peer communication and tada! problem solved.
+     </p>
+
+     <h2 id="conclusion">Conclusion</h2>
+     <p>
+     Migrating infrastructure to the cloud is another game when you're in control only of the infrastructure, not of the software. It is so because you can only optimize for the infrastructure part, which may limit your choices (or even remove them altogether) of achieving your desired goal.
+     </p>
+     <p>
+     40ms sounds like a negligible lag for applications that are not low-latency-critical but depending on the infrastructure and software components it may cause serious trouble.
+     </p>
+
+
+    </div>
+
+    <aside class="post-toc">
+      <p class="post-toc-label">Contents</p>
+      <a href="#introduction">Introduction</a>
+      <a href="#cloud-latency">Cloud latency</a>
+      <a href="#back-to-on-prem">Should we move back to on-prem?</a>
+      <a href="#conclusion">Conclusion</a>
+    </aside>
+    </div>
+
+    <footer>
+      <div class="footer-left">
+        <span class="footer-logo">Maximos Nikiforakis</span>
+        <span class="footer-copy">© 2026 · All rights reserved</span>
+      </div>
+      <div class="footer-right">
+        <a class="footer-link" href="mailto:nikiforos@live.co.uk">Email</a>
+        <a class="footer-link" href="https://www.linkedin.com/in/maximos-nikiforakis/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="footer-link" href="https://github.com/Maxcode123" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
